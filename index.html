@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#05080d"><title>Jarvis</title></head><body style="margin:0;background:#05080d">
+<meta name="robots" content="noindex,nofollow">
+<style id="jv-css">
+#jv,#jv *{box-sizing:border-box}
+#jv{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;background:radial-gradient(120% 80% at 50% 0%,#0d1a2b 0%,#05080d 60%);color:#e8f1fa;font:17px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);height:100vh;height:100dvh}
+#jv button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#jv .top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+#jv .brand{font-weight:700;letter-spacing:.32em;font-size:15px;color:#7fdcff}
+#jv .chips{display:flex;gap:8px}
+#jv .chip{border:1px solid #1f3a55;background:#0b1624;border-radius:999px;padding:8px 14px;font-size:14px;min-height:40px}
+#jv .chip.on{background:#0f3a52;border-color:#35d0ff;color:#bff0ff}
+#jv .log{flex:1;overflow-y:auto;padding:8px 16px 12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+#jv .msg{max-width:88%;padding:10px 14px;border-radius:16px;white-space:pre-wrap;word-wrap:break-word}
+#jv .me{align-self:flex-end;background:#12365a;border-bottom-right-radius:4px}
+#jv .ai{align-self:flex-start;background:#0e1b2b;border:1px solid #1b3550;border-bottom-left-radius:4px}
+#jv .sys{align-self:center;color:#8aa4bb;font-size:14px;text-align:center}
+#jv .act{align-self:flex-start;display:flex;flex-wrap:wrap;gap:8px}
+#jv .act button{background:#e3b04b;color:#1a1204;border:0;border-radius:12px;padding:12px 16px;font-weight:700;min-height:48px}
+#jv .stage{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 0 4px}
+#jv .orb{position:relative;width:128px;height:128px;border:0;border-radius:50%;background:transparent;padding:0}
+#jv .orb i{position:absolute;inset:0;border-radius:50%;border:2px solid #35d0ff;opacity:.5}
+#jv .orb i:nth-child(2){inset:12px;border-style:dashed;opacity:.7;animation:jvspin 14s linear infinite}
+#jv .orb i:nth-child(3){inset:26px;border-color:#7fdcff;opacity:.9;animation:jvspin 8s linear infinite reverse}
+#jv .orb b{position:absolute;inset:40px;border-radius:50%;background:radial-gradient(circle,#dffaff 0%,#35d0ff 45%,#0a5f86 100%);box-shadow:0 0 28px #35d0ff}
+#jv .orb.listening b{background:radial-gradient(circle,#fff3d6 0%,#e3b04b 50%,#7a4d06 100%);box-shadow:0 0 36px #e3b04b;animation:jvpulse 1.1s ease-in-out infinite}
+#jv .orb.listening i{border-color:#e3b04b}
+#jv .orb.thinking i:nth-child(2){animation-duration:2s}
+#jv .orb.thinking i:nth-child(3){animation-duration:1.4s}
+#jv .orb.speaking b{animation:jvpulse .7s ease-in-out infinite}
+@keyframes jvspin{to{transform:rotate(360deg)}}
+@keyframes jvpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+#jv .state{font-size:14px;color:#8aa4bb;min-height:20px}
+#jv .bar{display:flex;gap:8px;padding:8px 16px 14px}
+#jv .bar input{flex:1;min-width:0;background:#0b1624;border:1px solid #1f3a55;border-radius:14px;color:inherit;font:inherit;padding:12px 14px;min-height:48px}
+#jv .bar button{background:#0f3a52;border:1px solid #35d0ff;border-radius:14px;padding:0 18px;min-height:48px}
+#jv .sheet{position:absolute;inset:0;background:#05080dee;display:none;overflow-y:auto;padding:16px}
+#jv .sheet.open{display:block}
+#jv .card{max-width:560px;margin:0 auto;background:#0b1624;border:1px solid #1f3a55;border-radius:18px;padding:18px}
+#jv .card h2{margin:0 0 12px;font-size:20px}
+#jv label{display:block;margin:14px 0 6px;color:#9fc0d8;font-size:14px}
+#jv .f{width:100%;background:#06101b;border:1px solid #23415c;border-radius:12px;color:inherit;font:inherit;padding:12px;min-height:48px}
+#jv textarea.f{min-height:96px;resize:vertical}
+#jv .row{display:flex;gap:10px;margin-top:18px}
+#jv .btn{flex:1;border-radius:12px;border:1px solid #35d0ff;background:#0f3a52;padding:12px;min-height:48px;font-weight:700}
+#jv .btn.alt{background:transparent;border-color:#33506a}
+#jv .note{color:#8aa4bb;font-size:13px;margin-top:10px}
+@media (max-height:620px){#jv .orb{width:92px;height:92px}#jv .orb b{inset:28px}#jv .orb i:nth-child(2){inset:8px}#jv .orb i:nth-child(3){inset:18px}}
+</style>
+<div id="jv" aria-label="Jarvis">
+  <div class="top">
+    <div class="brand">JARVIS</div>
+    <div class="chips">
+      <button class="chip" id="jvLang" type="button">EN</button>
+      <button class="chip" id="jvWake" type="button">Wake: off</button>
+      <button class="chip" id="jvGear" type="button" aria-label="Settings">Settings</button>
+    </div>
+  </div>
+  <div class="log" id="jvLog" aria-live="polite"></div>
+  <div class="stage">
+    <button class="orb" id="jvOrb" type="button" aria-label="Talk to Jarvis"><i></i><i></i><i></i><b></b></button>
+    <div class="state" id="jvState">Tap the circle and speak</div>
+  </div>
+  <div class="bar">
+    <input id="jvIn" type="text" placeholder="Or type here" autocomplete="off" enterkeyhint="send">
+    <button id="jvSend" type="button">Send</button>
+  </div>
+  <div class="sheet" id="jvSet">
+    <div class="card">
+      <h2>Settings</h2>
+      <label for="jvProv">Brain</label>
+      <select class="f" id="jvProv"><option value="claude">Claude (Anthropic key)</option><option value="gemini">Gemini (Google key)</option></select>
+      <label for="jvKey">API key</label>
+      <input class="f" id="jvKey" type="password" autocomplete="off" placeholder="Paste your key here">
+      <div class="note">The key is saved only in this phone's browser. It is sent only to the company you chose above.</div>
+      <label for="jvModel">Model (leave empty for the default)</label>
+      <input class="f" id="jvModel" type="text" autocomplete="off" placeholder="claude-haiku-5-5 or gemini-2.5-flash">
+      <label for="jvName">What should Jarvis call you?</label>
+      <input class="f" id="jvName" type="text" autocomplete="off" placeholder="Najwan">
+      <label for="jvCon">Contacts (one per line: Name = number with country code)</label>
+      <textarea class="f" id="jvCon" placeholder="Ahmed = 971501234567"></textarea>
+      <label for="jvRate">Voice speed</label>
+      <input id="jvRate" type="range" min="0.7" max="1.4" step="0.05" value="1" style="width:100%">
+      <label for="jvKeep">Keep listening after each answer</label>
+      <select class="f" id="jvKeep"><option value="1">Yes</option><option value="0">No</option></select>
+      <div class="row">
+        <button class="btn alt" id="jvClear" type="button">Clear chat</button>
+        <button class="btn" id="jvSave" type="button">Save</button>
+      </div>
+      <div class="note">Everything you say is sent to the brain you chose so it can answer. Do not say passwords or private customer details.</div>
+    </div>
+  </div>
+</div>
+<script id="jv-js">
+(function(){
+try{document.documentElement.style.overflow='hidden'}catch(e){}
+var AMP=String.fromCharCode(38);
+var $=function(i){return document.getElementById(i)};
+var KEY='jarvis_v1';
+var S={prov:'claude',key:'',model:'',name:'',contacts:'',rate:1,keep:'1',lang:'en-US',hist:[]};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);for(var k in o){S[k]=o[k]}}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var synth=window.speechSynthesis;
+var rec=null,busy=false,wakeOn=false,armed=false,listening=false,speaking=false,wl=null;
+var WAKE=['jarvis','jarvus','javis',String.fromCharCode(1580,1575,1585,1601,1587),String.fromCharCode(1580,1575,1585,1601,1610,1587)];
+var log=$('jvLog');
+
+function say(cls,text){var d=document.createElement('div');d.className='msg '+cls;d.setAttribute('dir','auto');d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
+function sys(text){var d=document.createElement('div');d.className='sys';d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight}
+function setState(cls,txt){var orb=$('jvOrb');orb.className='orb '+cls;$('jvState').textContent=txt}
+function langLabel(){$('jvLang').textContent=S.lang==='ar-AE'?'AR':'EN'}
+function wakeLabel(){$('jvWake').textContent=wakeOn?'Wake: on':'Wake: off';$('jvWake').className='chip'+(wakeOn?' on':'')}
+
+function isArabic(t){var n=0;for(var i=0;i<t.length;i++){var c=t.charCodeAt(i);if(c>1535){if(c<1792){n++}}}return n>2}
+
+/* ---------- speech out ---------- */
+function pickVoice(lang){
+  if(!synth){return null}
+  var vs=synth.getVoices();var pre=lang.slice(0,2);var best=null;
+  for(var i=0;i<vs.length;i++){var v=vs[i];if(v.lang){if(v.lang.slice(0,2)===pre){if(!best){best=v}if(v.lang===lang){best=v}}}}
+  return best;
+}
+function speak(text,done){
+  if(!synth){done();return}
+  try{synth.cancel()}catch(e){}
+  var u=new SpeechSynthesisUtterance(text);
+  var lang=isArabic(text)?'ar-SA':'en-US';
+  u.lang=lang;var v=pickVoice(lang);if(v){u.voice=v}
+  u.rate=Number(S.rate)||1;
+  speaking=true;setState('speaking','Speaking... tap to stop');
+  var fin=false;
+  var end=function(){if(fin){return}fin=true;speaking=false;done()};
+  u.onend=end;u.onerror=end;
+  synth.speak(u);
+}
+function stopSpeak(){try{if(synth){synth.cancel()}}catch(e){}speaking=false}
+
+/* ---------- brain ---------- */
+function contactsMap(){
+  var m={},lines=(S.contacts||'').split(String.fromCharCode(10));
+  for(var i=0;i<lines.length;i++){var p=lines[i].split('=');if(p.length>1){var n=p[0].trim().toLowerCase();var num=p.slice(1).join('=').trim();if(n){m[n]=num}}}
+  return m;
+}
+function systemPrompt(){
+  var who=S.name||'the user';
+  var now=new Date().toString();
+  return 'You are Jarvis, a calm, clever and concise voice assistant for '+who+'. Your replies are spoken aloud, so use short plain sentences with no markdown, no lists and no emojis unless asked. Answer in the language the user spoke (English or Arabic). Current date and time: '+now+'. '
+  +'Contacts (name = number): '+((S.contacts||'').split(String.fromCharCode(10)).join('; ')||'none saved')+'. '
+  +'You can ask the phone to do things. ALWAYS reply with exactly one JSON object and nothing else, in this form: {"say":"text to speak","actions":[]}. '
+  +'Each action is an object with a type: '
+  +'{"type":"call","to":"name or number"}, {"type":"sms","to":"name or number","body":"text"}, {"type":"whatsapp","to":"name or number","body":"text"}, '
+  +'{"type":"alarm","hour":0-23,"minute":0-59,"label":"text"}, {"type":"timer","seconds":number,"label":"text"}, {"type":"maps","query":"place"}, '
+  +'{"type":"search","query":"text"}, {"type":"open_url","url":"https://..."}, {"type":"email","to":"address","subject":"text","body":"text"}. '
+  +'Only add an action when the user clearly asks for it. For calls and messages use a saved contact or a number the user gave; if you do not know the number, ask for it and add no action. '
+  +'Never say an action is already done: the user must tap a button to confirm it, so say things like "Ready, tap to call". If you do not know something, say so honestly.';
+}
+function errMsg(j,st){if(j){if(j.error){if(j.error.message){return j.error.message}}}return 'Error '+st}
+function callBrain(){
+  var hist=S.hist.slice(-16);
+  var model=S.model||(S.prov==='claude'?'claude-haiku-5-5':'gemini-2.5-flash');
+  if(S.prov==='claude'){
+    var msgs=[];for(var i=0;i<hist.length;i++){msgs.push({role:hist[i].r,content:hist[i].t})}
+    return fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':S.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:model,max_tokens:600,system:systemPrompt(),messages:msgs})})
+    .then(function(r){return r.json().then(function(j){if(!r.ok){throw new Error(errMsg(j,r.status))}var c0=j.content?j.content[0]:null;return c0?c0.text:''})});
+  }
+  var cs=[];for(var k=0;k<hist.length;k++){cs.push({role:hist[k].r==='user'?'user':'model',parts:[{text:hist[k].t}]})}
+  return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':S.key},body:JSON.stringify({systemInstruction:{parts:[{text:systemPrompt()}]},contents:cs,generationConfig:{maxOutputTokens:600,responseMimeType:'application/json'}})})
+  .then(function(r){return r.json().then(function(j){if(!r.ok){throw new Error(errMsg(j,r.status))}var c=j.candidates?j.candidates[0]:null;var pt=c?(c.content?c.content.parts:null):null;return pt?pt[0].text:''})});
+}
+function parseReply(t){
+  var a=t.indexOf('{'),b=t.lastIndexOf('}');
+  if(a>-1){if(b>a){try{var o=JSON.parse(t.slice(a,b+1));if(o){return {say:String(o.say||''),actions:Array.isArray(o.actions)?o.actions:[]}}}catch(e){}}}
+  return {say:t,actions:[]};
+}
+
+/* ---------- phone actions (user taps to confirm) ---------- */
+function resolveNum(to){
+  var s=String(to||'').trim();var m=contactsMap();var key=s.toLowerCase();
+  if(m[key]){s=m[key]}
+  var digits='';for(var i=0;i<s.length;i++){var c=s.charAt(i);if(c>='0'){if(c<='9'){digits+=c}}}
+  var plus=s.charAt(0)==='+';
+  return {digits:digits,tel:(plus?'+':'')+digits};
+}
+function enc(x){return encodeURIComponent(String(x||''))}
+function describe(a){
+  var t=a.type;
+  if(t==='call'){return 'Call '+a.to}
+  if(t==='sms'){return 'Text '+a.to}
+  if(t==='whatsapp'){return 'WhatsApp '+a.to}
+  if(t==='alarm'){return 'Set alarm '+a.hour+':'+(a.minute<10?'0':'')+(a.minute||0)}
+  if(t==='timer'){return 'Start timer '+Math.round(Number(a.seconds)/60*10)/10+' min'}
+  if(t==='maps'){return 'Open map: '+a.query}
+  if(t==='search'){return 'Search: '+a.query}
+  if(t==='open_url'){return 'Open link'}
+  if(t==='email'){return 'Write email'}
+  return '';
+}
+function runAction(a){
+  var t=a.type,u='';
+  if(t==='call'){var n=resolveNum(a.to);if(!n.digits){sys('I do not have a number for '+a.to+'. Add it in Settings.');return}u='tel:'+n.tel}
+  else if(t==='sms'){var n2=resolveNum(a.to);if(!n2.digits){sys('No number for '+a.to);return}u='sms:'+n2.tel+'?body='+enc(a.body)}
+  else if(t==='whatsapp'){var n3=resolveNum(a.to);if(!n3.digits){sys('No number for '+a.to);return}u='https://wa.me/'+n3.digits+'?text='+enc(a.body)}
+  else if(t==='alarm'){u='intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR='+(parseInt(a.hour,10)||0)+';i.android.intent.extra.alarm.MINUTES='+(parseInt(a.minute,10)||0)+';S.android.intent.extra.alarm.MESSAGE='+enc(a.label||'Jarvis')+';end'}
+  else if(t==='timer'){u='intent:#Intent;action=android.intent.action.SET_TIMER;i.android.intent.extra.alarm.LENGTH='+(parseInt(a.seconds,10)||60)+';S.android.intent.extra.alarm.MESSAGE='+enc(a.label||'Jarvis')+';end'}
+  else if(t==='maps'){u='geo:0,0?q='+enc(a.query)}
+  else if(t==='search'){u='https://www.google.com/search?q='+enc(a.query)}
+  else if(t==='open_url'){var l=String(a.url||'');if(l.indexOf('https://')===0){u=l}else{sys('I only open secure links.');return}}
+  else if(t==='email'){u='mailto:'+String(a.to||'')+'?subject='+enc(a.subject)+AMP+'body='+enc(a.body)}
+  if(u){window.location.href=u}
+}
+function showActions(list){
+  if(!list.length){return}
+  var box=document.createElement('div');box.className='act';
+  list.forEach(function(a){
+    var d=describe(a);if(!d){return}
+    var b=document.createElement('button');b.type='button';b.textContent=d;
+    b.addEventListener('click',function(){runAction(a)});
+    box.appendChild(b);
+  });
+  if(box.childNodes.length){log.appendChild(box);log.scrollTop=log.scrollHeight}
+}
+
+/* ---------- conversation ---------- */
+function handle(text){
+  text=String(text||'').trim();if(!text){return}
+  if(!S.key){say('sys','Add your API key in Settings first.');openSet();return}
+  busy=true;stopRec();
+  say('me',text);S.hist.push({r:'user',t:text});
+  setState('thinking','Thinking...');
+  callBrain().then(function(raw){
+    S.hist.push({r:'assistant',t:raw});if(S.hist.length>40){S.hist=S.hist.slice(-40)}save();
+    var p=parseReply(raw);
+    say('ai',p.say||'...');showActions(p.actions);
+    speak(p.say,function(){busy=false;afterTurn()});
+  }).catch(function(e){
+    S.hist.pop();busy=false;
+    say('sys','Problem: '+(e?(e.message||'could not reach the brain'):'could not reach the brain'));
+    setState('','Tap the circle and speak');
+    afterTurn(true);
+  });
+}
+function afterTurn(failed){
+  if(wakeOn){startRec(true);return}
+  if(S.keep==='1'){if(!failed){startRec(false);return}}
+  setState('','Tap the circle and speak');
+}
+
+/* ---------- speech in ---------- */
+function stopRec(){listening=false;if(rec){try{rec.onend=null;rec.abort()}catch(e){}rec=null}}
+function startRec(cont){
+  if(!SR){setState('','Voice input is not supported here. Please type.');return}
+  if(busy){return}
+  stopRec();
+  var r=new SR();rec=r;r.lang=S.lang;r.interimResults=true;r.continuous=!!cont;
+  var finalText='';
+  listening=true;
+  setState('listening',wakeOn?(armed?'Listening for your command...':'Say "Jarvis" then your request'):'Listening...');
+  r.onresult=function(ev){
+    var interim='';
+    for(var i=ev.resultIndex;i<ev.results.length;i++){
+      var res=ev.results[i];
+      if(res.isFinal){
+        var tx=res[0].transcript.trim();
+        if(wakeOn){wakeText(tx)}else{finalText+=(finalText?' ':'')+tx}
+      }else{interim+=res[0].transcript}
+    }
+    if(interim){$('jvState').textContent=interim}
+  };
+  r.onerror=function(ev){
+    if(ev.error==='not-allowed'){wakeOn=false;wakeLabel();listening=false;setState('','Microphone is blocked. Allow it in the browser site settings.');sys('Microphone permission is needed.')}
+  };
+  r.onend=function(){
+    if(rec!==r){return}
+    listening=false;
+    if(wakeOn){if(!busy){setTimeout(function(){startRec(true)},250)}return}
+    if(finalText){handle(finalText)}else{setState('','Tap the circle and speak')}
+  };
+  try{r.start()}catch(e){}
+}
+function wakeText(tx){
+  var low=tx.toLowerCase();var hit=-1,len=0;
+  for(var i=0;i<WAKE.length;i++){var ix=low.indexOf(WAKE[i]);if(ix>-1){if(hit<0){hit=ix;len=WAKE[i].length}}}
+  if(armed){armed=false;handle(tx);return}
+  if(hit<0){return}
+  var cmd=tx.slice(hit+len).trim();while(cmd.length>0){if(' ,.:!?-'.indexOf(cmd.charAt(0))>-1){cmd=cmd.slice(1)}else{break}}cmd=cmd.trim();
+  if(cmd.length>2){handle(cmd)}else{armed=true;setState('listening','Yes? Say your request')}
+}
+
+/* ---------- ui ---------- */
+function openSet(){
+  $('jvProv').value=S.prov;$('jvKey').value=S.key;$('jvModel').value=S.model;$('jvName').value=S.name;$('jvCon').value=S.contacts;$('jvRate').value=S.rate;$('jvKeep').value=S.keep;
+  $('jvSet').className='sheet open';
+}
+$('jvGear').addEventListener('click',openSet);
+$('jvSave').addEventListener('click',function(){
+  S.prov=$('jvProv').value;S.key=$('jvKey').value.trim();S.model=$('jvModel').value.trim();S.name=$('jvName').value.trim();S.contacts=$('jvCon').value;S.rate=$('jvRate').value;S.keep=$('jvKeep').value;
+  save();$('jvSet').className='sheet';sys('Saved.');
+});
+$('jvClear').addEventListener('click',function(){S.hist=[];save();log.innerHTML='';sys('Chat cleared.')});
+$('jvLang').addEventListener('click',function(){S.lang=S.lang==='ar-AE'?'en-US':'ar-AE';save();langLabel();sys(S.lang==='ar-AE'?'Listening in Arabic.':'Listening in English.')});
+$('jvWake').addEventListener('click',function(){
+  wakeOn=!wakeOn;armed=false;wakeLabel();
+  if(wakeOn){
+    try{if(navigator.wakeLock){navigator.wakeLock.request('screen').then(function(l){wl=l}).catch(function(){})}}catch(e){}
+    sys('Wake mode: keep this screen open and say "Jarvis" before your request.');startRec(true);
+  }else{
+    stopRec();try{if(wl){wl.release();wl=null}}catch(e){}
+    setState('','Tap the circle and speak');
+  }
+});
+$('jvOrb').addEventListener('click',function(){
+  if(speaking){stopSpeak();busy=false;setState('','Tap the circle and speak');return}
+  if(listening){stopRec();if(wakeOn){wakeOn=false;wakeLabel()}setState('','Tap the circle and speak');return}
+  if(busy){return}
+  startRec(false);
+});
+function sendTyped(){var v=$('jvIn').value;$('jvIn').value='';if(v.trim()){handle(v)}}
+$('jvSend').addEventListener('click',sendTyped);
+$('jvIn').addEventListener('keydown',function(e){if(e.key==='Enter'){sendTyped()}});
+if(synth){try{synth.getVoices();synth.onvoiceschanged=function(){}}catch(e){}}
+langLabel();wakeLabel();
+if(S.key){sys('Ready. Tap the circle and speak, or type.')}else{sys('Welcome. Open Settings and add your API key to begin.')}
+})();
+</script>
+</body></html>
